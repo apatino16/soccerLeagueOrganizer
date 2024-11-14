@@ -21,6 +21,7 @@ public class LeagueManager {
     private TreeMap<String, Team> mTeams = new TreeMap<>();
     private BufferedReader mReader = new BufferedReader(new InputStreamReader(System.in));
     private Map<String, String> mMenu;
+    private List<Player> waitingList = new ArrayList<>();
 
     // Method that displays menu options to the user
     public LeagueManager() {
@@ -31,6 +32,7 @@ public class LeagueManager {
         mMenu.put("height report", " iew a team's height report");
         mMenu.put("balance report", "View league balance report");
         mMenu.put("roster", "Print team roster");
+        mMenu.put("add to waiting list", "Add player to the waiting list");
         mMenu.put("quit", "Quit the program");
         mMenu.put("auto build", "Automatically build fair teams");
     }
@@ -64,6 +66,9 @@ public class LeagueManager {
                         break;
                     case "auto build":
                         autoBuildTeams();
+                        break;
+                    case "add to waiting list":
+                        addToWaitingList();
                         break;
                     case "quit":
                         System.out.println("Exiting the League manager program...");
@@ -336,6 +341,51 @@ public class LeagueManager {
             System.out.println("Team: " + entry.getKey() + " has " + entry.getValue().getPlayers().size() + " players.");
         }
     }
+
+    // Adding players to the waiting list
+    private void addToWaitingList() throws IOException {
+    System.out.print("Enter player's first name: ");
+    String firstName = mReader.readLine();
+    System.out.print("Enter player's last name: ");
+    String lastName = mReader.readLine();
+    System.out.print("Enter player's height in inches: ");
+    int height = Integer.parseInt(mReader.readLine());
+    System.out.print("Does the player have previous experience? (yes/no): ");
+    boolean hasExperience = "yes".equalsIgnoreCase(mReader.readLine());
+
+    Player newPlayer = new Player(firstName, lastName, height, hasExperience);
+    waitingList.add(newPlayer);
+    System.out.println("Player added to the waiting list.");
+    attemptToAssignPlayersFromWaitingList();
+}
+
+private void attemptToAssignPlayersFromWaitingList() {
+    if (waitingList.isEmpty()) {
+        System.out.println("No players in the waiting list.");
+        return;
+    }
+
+    Iterator<Player> iterator = waitingList.iterator();
+    while (iterator.hasNext()) {
+        Player player = iterator.next();
+        if (addPlayerToAvailableTeam(player)) {
+            System.out.println("Player " + player.getFirstName() + " " + player.getLastName() + " added to a team from the waiting list.");
+            iterator.remove(); // Remove player from the waiting list after assigning to a team
+        }
+    }
+}
+
+private boolean addPlayerToAvailableTeam(Player player) {
+    for (Team team : mTeams.values()) {
+        if (team.getPlayers().size() < 11) { 
+            team.addPlayer(player);
+            player.setAssigned(true);
+            return true;
+        }
+    }
+    return false;
+}
+
 
     public static void main(String[] args) {
 
