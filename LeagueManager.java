@@ -286,20 +286,20 @@ public class LeagueManager {
         System.out.println("League Balance Report:");
         for (Map.Entry<String, Team> entry : mTeams.entrySet()) {
             Team team = entry.getValue();
-            int experienceCounted = 0;
+            int experiencedCount = 0;
             int totalPlayers = team.getPlayers().size();
-            
+
             for (Player player : team.getPlayers()) {
                 if (player.isPreviousExperience()) {
-                    experienceCount++;
+                    experiencedCount++;
                 }
             }
 
-        // Displaying the results
-        double experiencedPercentage = totalPlayers > 0 ? (double) experiencedCount / totalPlayers * 100 : 0;
+            // Displaying the results
+            double experiencedPercentage = totalPlayers > 0 ? (double) experiencedCount / totalPlayers * 100 : 0;
             System.out.printf("Team: %s\n", team.getTeamName());
             System.out.printf("Total Players: %d, Experienced Players: %d, Inexperienced Players: %d%n",
-                   totalPlayers, experienceCount, totalPlayers - experienceCount);
+                    totalPlayers, experiencedCount, totalPlayers - experiencedCount);
             System.out.printf("Percentage of Experienced Players: %.2f%%\n\n", experiencedPercentage);
         }
     }
