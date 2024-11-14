@@ -5,8 +5,11 @@ import com.teamtreehouse.model.Team;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -113,10 +116,11 @@ public class LeagueManager {
 
     // Select a player from the list of unassigned players
     private Player selectPlayer() throws IOException {
-        System.out.println("Available players:");
+        displayPlayersAlphabetically();
+        System.out.println("Select a player by index:");
+        int index = Integer.parseInt(mReader.readLine()) - 1;
         Player[] players = Players.load();
         ArrayList<Player> unassignedPlayers = new ArrayList<>();
-        int index = 1;
         for (Player player : players) {
             if (!player.isAssigned()) {
                 unassignedPlayers.add(player);
@@ -163,6 +167,7 @@ public class LeagueManager {
     }
 
     private Player selectPlayerForRemoval(Team team) throws IOException {
+        displayPlayersAlphabetically();
         Set<Player> players = team.getPlayers();
         int index = 0;
         Map<Integer, Player> indeedPlayers = new HashMap<>();
@@ -190,6 +195,19 @@ public class LeagueManager {
                 selectedTeam.getPlayers().remove(playerToRemove);
                 playerToRemove.setAssigned(false);
                 System.out.println("Player " + playerToRemove.getFirstName() + " " + playerToRemove.getLastName() + " has been removed from " + selectedTeam.getTeamName());
+            }
+        }
+    }
+
+    // Method to display players alphabetically
+    private void displayPlayersAlphabetically() throws IOException{
+        List<Player> players = new ArrayList<>(Arrays.asList(Players.load()));
+        Collections.sort(players);
+
+        System.out.println("Available Players:");
+        for (Player player : players){
+            if (!player.isAssigned()){
+                System.out.println(player.getLastName() + ", " + player.getFirstName() + " - Height: " + player.getHeightInInches() + " inches, Experience: " + (player.isPreviousExperience() ? "Yes" : "No"));
             }
         }
     }
