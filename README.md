@@ -13,7 +13,7 @@ The Soccer League Manager is a Java console application created as part of Unit 
 - **Interactive Menu:** Navigate through the program's features using a simple command-line interface.
 
 ### Getting Started
---
+---
 
 1. **Prerequisites:**
    - Java JDK installed on your computer.
@@ -36,6 +36,7 @@ The Soccer League Manager is a Java console application created as part of Unit 
      ```
 
 ### Usage
+---
 
 - After starting the application, you will be greeted with a menu of options:
   - **Create a new team:** Follow the prompts to input the team name and coach's name.
