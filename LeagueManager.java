@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class LeagueManager {
     private ArrayList<Team> mTeams = new ArrayList<>();
@@ -19,6 +20,7 @@ public class LeagueManager {
         mMenu = new HashMap<>();
         mMenu.put("create", "Create a new team");
         mMenu.put("add", "Add player to a team");
+        mMenu.put("remove", "Remove a player from a team");
         mMenu.put("quit", "Quit the program");
     }
 
@@ -52,6 +54,9 @@ public class LeagueManager {
                             System.out.println("There are no available teams. Please create one first.");
                         }
                         addPlayerToTeam();
+                        break;
+                    case "remove":
+                        removePlayerFromTeam();
                         break;
                     case "quit":
                         System.out.println("Exiting the League manager program...");
@@ -124,13 +129,13 @@ public class LeagueManager {
 
     public void addPlayerToTeam() throws IOException {
         Team selectedTeam = selectTeam();
-        if (selectedTeam == null){
+        if (selectedTeam == null) {
             System.out.println("No team selected or no teams exist.");
             return;
         }
 
         // Check if the selected team has fewer than 11 players
-        if (selectedTeam.getPlayers().size() >= 11){
+        if (selectedTeam.getPlayers().size() >= 11) {
             // No more players can be added
             System.out.println("This team already has 11 players. No more players can be added.");
             return;
@@ -138,7 +143,7 @@ public class LeagueManager {
 
         // display unassigned players and allow the user to select one
         Player selectedPlayer = selectPlayer();
-        if (selectedPlayer == null){
+        if (selectedPlayer == null) {
             System.out.println("No player selected or no available players.");
             return;
         }
@@ -147,6 +152,38 @@ public class LeagueManager {
         selectedTeam.getPlayers().add(selectedPlayer);
         selectedPlayer.setAssigned(true); // Mark the player as assigned to a team
         System.out.println("Player " + selectedPlayer.getFirstName() + " " + selectedPlayer.getLastName() + " succesfully added to " + selectedTeam.getTeamName() + ".");
+    }
+
+    private Player selectPlayerForRemoval(Team team) throws IOException {
+        Set<Player> players = team.getPlayers();
+        int index = 0;
+        Map<Integer, Player> indeedPlayers = new HashMap<>();
+
+        for (Player player : players) {
+            indeedPlayers.put(++index, player);
+            System.out.println(index + " - " + player.getFirstName() + " " + player.getLastName());
+        }
+        System.out.print("Select a player to remove by index: ");
+        int playerIndex = Integer.parseInt(mReader.readLine());
+
+        if (indeedPlayers.containsKey(playerIndex)) {
+            return indeedPlayers.get(playerIndex);
+        } else {
+            System.out.println("Invalid index. Please try again.");
+            return selectPlayerForRemoval(team);
+        }
+    }
+
+    public void removePlayerFromTeam() throws IOException {
+        Team selectedTeam = selectTeam();
+        if (selectedTeam != null){
+            Player playerToRemove = selectPlayerForRemoval(selectedTeam);
+            if (playerToRemove != null){
+                selectedTeam.getPlayers().remove(playerToRemove);
+                playerToRemove.setAssigned(false);
+                System.out.println("Player " + playerToRemove.getFirstName() + " " + playerToRemove.getLastName() + " has been removed from " + selectedTeam.getTeamName());
+            }
+        }
     }
 
     public static void main(String[] args) {
