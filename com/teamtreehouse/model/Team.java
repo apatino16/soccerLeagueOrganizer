@@ -30,11 +30,11 @@ public class Team {
         mTeamName = teamName;
     }
 
-    public Set<Player> getPlayers(){
+    public Set<Player> getPlayers() {
         return players;
     }
 
-    public void addPlayer(Player player){
+    public void addPlayer(Player player) {
         players.add(player);
     }
 }

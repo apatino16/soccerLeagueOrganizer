@@ -177,7 +177,8 @@ public class LeagueManager {
     }
 
     // Display Height Report
-    private void displayHeightReport(Team team) {
+    private void displayHeightReport() throws IOException {
+        Team team = selectTeam();
         if (team == null || team.getPlayers().isEmpty()) {
             System.out.println("No players in the team or team not selected.");
             return;
@@ -185,130 +186,131 @@ public class LeagueManager {
 
         // Define height ranges
         Set<Player> players = team.getPlayers();
-        Map<String, ArrayList<Player>> heightGroups = new TreeMap<>();
-        int[] heightRanges = {35, 40, 46, 50, 55, 60}; // Height treshold
+        Map<String, List<Player>> heightGroups = new TreeMap<>();
+        String[] heightRanges = {"35-40", "41-46", "47-50", "51+"}; // Height treshold
 
         // Initializes players by height
-        for (int i = 0; i < heightRanges.length - 1; i++) {
-            heightGroups.get(heightRanges[i] + "-" + (heightRanges[i + 1] - 1), new ArrayList<>());
+        for (String key : heightRanges) {
+            heightGroups.put(key, new ArrayList<>());
         }
 
         // Group players by height
-        for (Player player : team.getPlayers()) {
-
-            for (int i = 0; i < heightRanges.length - 1; i++) {
-                if (player.getHeightInInches() >= heightRanges[i] && player.getHeightInInches() < heightRanges[i + 1]) {
-                    String key = heightRanges[i] + "-" + (heightRanges[i + 1] - 1);
-                    List<Player> list = heightGroups.get(key);
-                    list.add(player);
-                    break;
-                }
+        for (Player player : players) {
+            int playerHeight = player.getHeightInInches();
+            if (playerHeight >= 35 && playerHeight <= 40) {
+                heightGroups.get("35-40").add(player);
+            } else if (playerHeight >= 41 && playerHeight <= 46) {
+                heightGroups.get("41-46").add(player);
+            } else if (playerHeight >= 47 && playerHeight <= 50) {
+                heightGroups.get("47-50").add(player);
+            } else if (playerHeight > 50) {
+                heightGroups.get("51+").add(player);
             }
         }
 
         // Display height groups
         for (Map.Entry<String, List<Player>> entry : heightGroups.entrySet()) {
-            System.out.println("Height range " + entry.getKey());
+            System.out.println("Height range " + entry.getKey() + "inches:");
             for (Player p : entry.getValue()) {
-                System.out.println(p.getFirstName() + " " + p.getLastName() + " - " + p.getHeightInInches() + " inches");
+                System.out.println(p.getFirstName() + " " + p.getLastName() + " - " + p.getHeightInInches() + " inches, Experience: " + (p.isPreviousExperience() ? "Yes" : "No"));
             }
         }
     }
 
-        private Player selectPlayerForRemoval (Team team) throws IOException {
-            displayPlayersAlphabetically();
-            Set<Player> players = team.getPlayers();
-            int index = 0;
-            Map<Integer, Player> indeedPlayers = new HashMap<>();
+    private Player selectPlayerForRemoval(Team team) throws IOException {
+        displayPlayersAlphabetically();
+        Set<Player> players = team.getPlayers();
+        int index = 0;
+        Map<Integer, Player> indeedPlayers = new HashMap<>();
 
-            for (Player player : players) {
-                indeedPlayers.put(++index, player);
-                System.out.println(index + " - " + player.getFirstName() + " " + player.getLastName());
-            }
-            System.out.print("Select a player to remove by index: ");
-            int playerIndex = Integer.parseInt(mReader.readLine());
+        for (Player player : players) {
+            indeedPlayers.put(++index, player);
+            System.out.println(index + " - " + player.getFirstName() + " " + player.getLastName());
+        }
+        System.out.print("Select a player to remove by index: ");
+        int playerIndex = Integer.parseInt(mReader.readLine());
 
-            if (indeedPlayers.containsKey(playerIndex)) {
-                return indeedPlayers.get(playerIndex);
-            } else {
-                System.out.println("Invalid index. Please try again.");
-                return selectPlayerForRemoval(team);
+        if (indeedPlayers.containsKey(playerIndex)) {
+            return indeedPlayers.get(playerIndex);
+        } else {
+            System.out.println("Invalid index. Please try again.");
+            return selectPlayerForRemoval(team);
+        }
+    }
+
+    // Method to display players alphabetically
+    private void displayPlayersAlphabetically() throws IOException {
+        List<Player> players = new ArrayList<>(Arrays.asList(Players.load()));
+        Collections.sort(players);
+
+        System.out.println("Available Players:");
+        for (Player player : players) {
+            if (!player.isAssigned()) {
+                System.out.println(player.getLastName() + ", " + player.getFirstName() + " - Height: " + player.getHeightInInches() + " inches, Experience: " + (player.isPreviousExperience() ? "Yes" : "No"));
             }
         }
+    }
 
-        // Method to display players alphabetically
-        private void displayPlayersAlphabetically () throws IOException {
-            List<Player> players = new ArrayList<>(Arrays.asList(Players.load()));
-            Collections.sort(players);
+    private void displayLeagueBalanceReport() {
+        if (mTeams.isEmpty()) {
+            System.out.println("No teams available. Please create some teams first.");
+            return;
+        }
 
-            System.out.println("Available Players:");
-            for (Player player : players) {
-                if (!player.isAssigned()) {
-                    System.out.println(player.getLastName() + ", " + player.getFirstName() + " - Height: " + player.getHeightInInches() + " inches, Experience: " + (player.isPreviousExperience() ? "Yes" : "No"));
+        Map<String, int[]> balanceMap = new TreeMap<>(); // To store team names and counts of experienced/inexperienced players
+
+        for (Map.Entry<String, Team> entry : mTeams.entrySet()) {
+            String teamName = entry.getKey();
+            Team team = entry.getValue();
+            int[] counts = {0, 0}; // First index for experienced, second for inexperienced
+
+            for (Player player : team.getPlayers()) {
+                if (player.isPreviousExperience()) {
+                    counts[0]++; // Increment experienced count
+                } else {
+                    counts[1]++; // Increment inexperienced count
                 }
             }
-        }
-    
-    private void displayLeagueBalanceReport() {
-    if (mTeams.isEmpty()) {
-        System.out.println("No teams available. Please create some teams first.");
-        return;
-    }
 
-    Map<String, int[]> balanceMap = new TreeMap<>(); // To store team names and counts of experienced/inexperienced players
-
-    for (Map.Entry<String, Team> entry : mTeams.entrySet()) {
-        String teamName = entry.getKey();
-        Team team = entry.getValue();
-        int[] counts = {0, 0}; // First index for experienced, second for inexperienced
-
-        for (Player player : team.getTeamPlayers()) {
-            if (player.isPreviousExperience()) {
-                counts[0]++; // Increment experienced count
-            } else {
-                counts[1]++; // Increment inexperienced count
-            }
+            balanceMap.put(teamName, counts);
         }
 
-        balanceMap.put(teamName, counts);
+        // Displaying the results
+        System.out.println("League Balance Report:");
+        for (Map.Entry<String, int[]> teamEntry : balanceMap.entrySet()) {
+            System.out.printf("Team: %s, Experienced Players: %d, Inexperienced Players: %d%n",
+                    teamEntry.getKey(), teamEntry.getValue()[0], teamEntry.getValue()[1]);
+        }
     }
 
-    // Displaying the results
-    System.out.println("League Balance Report:");
-    for (Map.Entry<String, int[]> teamEntry : balanceMap.entrySet()) {
-        System.out.printf("Team: %s, Experienced Players: %d, Inexperienced Players: %d%n",
-                teamEntry.getKey(), teamEntry.getValue()[0], teamEntry.getValue()[1]);
+    private void displayTeamRoster() throws IOException {
+        Team selectedTeam = selectTeam();
+        if (selectedTeam == null) {
+            System.out.println("No team selected or no teams exist.");
+            return;
+        }
+
+        Set<Player> players = selectedTeam.getPlayers();
+        if (players.isEmpty()) {
+            System.out.println("No players in this team.");
+            return;
+        }
+
+        System.out.println("Roster for Team: " + selectedTeam.getTeamName());
+        for (Player player : players) {
+            System.out.printf("Name: %s %s, Height: %d inches, Experienced: %s%n",
+                    player.getFirstName(), player.getLastName(),
+                    player.getHeightInInches(), player.isPreviousExperience() ? "Yes" : "No");
+        }
     }
+
+
+    public static void main(String[] args) {
+
+        Player[] players = Players.load();
+        System.out.printf("There are currently %d registered players.%n", players.length);
+        new LeagueManager().runMenu();
+
+    }
+
 }
-
-    private void displayTeamRoster() {
-    Team selectedTeam = selectTeam();
-    if (selectedTeam == null) {
-        System.out.println("No team selected or no teams exist.");
-        return;
-    }
-
-    Set<Player> players = selectedTeam.getTeamPlayers();
-    if (players.isEmpty()) {
-        System.out.println("No players in this team.");
-        return;
-    }
-
-    System.out.println("Roster for Team: " + selectedTeam.getTeamName());
-    for (Player player : players) {
-        System.out.printf("Name: %s %s, Height: %d inches, Experienced: %s%n",
-                player.getFirstName(), player.getLastName(),
-                player.getHeightInInches(), player.isPreviousExperience() ? "Yes" : "No");
-    }
-}
-
-
-        public static void main (String[]args){
-
-            Player[] players = Players.load();
-            System.out.printf("There are currently %d registered players.%n", players.length);
-            new LeagueManager().runMenu();
-
-        }
-
-    }
