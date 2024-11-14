@@ -9,9 +9,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 public class LeagueManager {
-    private ArrayList<Team> mTeams = new ArrayList<>();
+    private TreeMap<String, Team> mTeams = new TreeMap<>();
     private BufferedReader mReader = new BufferedReader(new InputStreamReader(System.in));
     private Map<String, String> mMenu;
 
@@ -34,9 +35,7 @@ public class LeagueManager {
                 command = mReader.readLine();
                 switch (command) {
                     case "create":
-                        Team team = promptTeamCreation();
-                        mTeams.add(team);
-                        System.out.println("Team created succesfully: " + team.getTeamName());
+                        promptTeamCreation();
                         break;
                     case "add":
                         if (!mTeams.isEmpty()) {
@@ -78,25 +77,34 @@ public class LeagueManager {
         }
     }
 
-    private Team promptTeamCreation() throws IOException {
+    private void promptTeamCreation() throws IOException {
         System.out.print("Enter the team's name: ");
         String teamName = mReader.readLine();
         System.out.print("Enter the coach's name: ");
         String coachName = mReader.readLine();
-        return new Team(teamName, coachName);
+        Team newTeam = new Team(teamName, coachName);
+        mTeams.put(teamName, newTeam);
+        System.out.println("Team created successfully: " + teamName);
     }
 
     // Prompts user to enter the index number for the team they wish to select
     private Team selectTeam() throws IOException {
-        System.out.println("Choose a team:");
-        for (int i = 0; i < mTeams.size(); i++) {
-            System.out.println(i + 1 + ", " + mTeams.get(i).getTeamName());
+        if (mTeams.isEmpty()){
+            System.out.println("No teams available. Please create one first.");
+            return null;
         }
+
+        int index = 1;
+        for (Map.Entry<String, Team> entry: mTeams.entrySet()) {
+            System.out.println(index++ + " - " + entry.getKey());
+        }
+
+        System.out.println("Enter the index of the team to select: ");
         int teamIndex = Integer.parseInt(mReader.readLine()) - 1;
 
         // validate user input
         if (teamIndex >= 0 && teamIndex < mTeams.size()) {
-            return mTeams.get(teamIndex);
+            return new ArrayList<>(mTeams.values()).get(teamIndex);
         } else {
             System.out.println("Invalid team index. Please try again.");
             return selectTeam(); // recursively call selectTeam if the input is invalid
