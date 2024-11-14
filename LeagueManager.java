@@ -283,29 +283,24 @@ public class LeagueManager {
             return;
         }
 
-        Map<String, int[]> balanceMap = new TreeMap<>(); // To store team names and counts of experienced/inexperienced players
-
+        System.out.println("League Balance Report:");
         for (Map.Entry<String, Team> entry : mTeams.entrySet()) {
-            String teamName = entry.getKey();
             Team team = entry.getValue();
-            int[] counts = {0, 0}; // First index for experienced, second for inexperienced
-
+            int experienceCounted = 0;
+            int totalPlayers = team.getPlayers().size();
+            
             for (Player player : team.getPlayers()) {
                 if (player.isPreviousExperience()) {
-                    counts[0]++; // Increment experienced count
-                } else {
-                    counts[1]++; // Increment inexperienced count
+                    experienceCount++;
                 }
             }
 
-            balanceMap.put(teamName, counts);
-        }
-
         // Displaying the results
-        System.out.println("League Balance Report:");
-        for (Map.Entry<String, int[]> teamEntry : balanceMap.entrySet()) {
-            System.out.printf("Team: %s, Experienced Players: %d, Inexperienced Players: %d%n",
-                    teamEntry.getKey(), teamEntry.getValue()[0], teamEntry.getValue()[1]);
+        double experiencedPercentage = totalPlayers > 0 ? (double) experiencedCount / totalPlayers * 100 : 0;
+            System.out.printf("Team: %s\n", team.getTeamName());
+            System.out.printf("Total Players: %d, Experienced Players: %d, Inexperienced Players: %d%n",
+                   totalPlayers, experienceCount, totalPlayers - experienceCount);
+            System.out.printf("Percentage of Experienced Players: %.2f%%\n\n", experiencedPercentage);
         }
     }
 
