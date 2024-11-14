@@ -194,44 +194,54 @@ public class LeagueManager {
 
     // Display Height Report
     private void displayHeightReport() throws IOException {
-        Team team = selectTeam();
-        if (team == null || team.getPlayers().isEmpty()) {
-            System.out.println("No players in the team or team not selected.");
+        if (mTeams.isEmpty()) {
+            System.out.println("No teams have been created yet.");
             return;
         }
 
         // Define height ranges
-        Set<Player> players = team.getPlayers();
-        Map<String, List<Player>> heightGroups = new TreeMap<>();
         String[] heightRanges = {"35-40", "41-46", "47-50", "51+"}; // Height treshold
-
-        // Initializes players by height
-        for (String key : heightRanges) {
-            heightGroups.put(key, new ArrayList<>());
+        Map<String, Map<String, Integer>>  teamHeightCounts = new TreeMap<>();
+        
+        // Initialize the map for each team
+        for (Team team : mTeams.values()) {
+            Map<String, Integer> heightMap = new TreeMap<>();
+            for (String range : heightRanges){
+                heightMap.put(range, 0); // Initialize counts for each range
+            }
+            teamHeightCounts.put(team.getTeamName(), heightMap);
         }
 
-        // Group players by height
-        for (Player player : players) {
-            int playerHeight = player.getHeightInInches();
-            if (playerHeight >= 35 && playerHeight <= 40) {
-                heightGroups.get("35-40").add(player);
-            } else if (playerHeight >= 41 && playerHeight <= 46) {
-                heightGroups.get("41-46").add(player);
-            } else if (playerHeight >= 47 && playerHeight <= 50) {
-                heightGroups.get("47-50").add(player);
-            } else if (playerHeight > 50) {
-                heightGroups.get("51+").add(player);
+        // Count players in each height range for each team 
+        for (Team team : mTeams.values()) {
+            for (Player player : team.getPlayers()) {
+                String heightKey = determineHeightRange(player.getHeightInInches());
+                Map<String, Integer> counts = teamHeightCounts.get(team.getTeamName());
+                counts.put(heightKey, counts.get(heightKey) + 1);
             }
         }
 
-        // Display height groups
-        for (Map.Entry<String, List<Player>> entry : heightGroups.entrySet()) {
-            System.out.println("Height range " + entry.getKey() + "inches:");
-            for (Player p : entry.getValue()) {
-                System.out.println(p.getFirstName() + " " + p.getLastName() + " - " + p.getHeightInInches() + " inches, Experience: " + (p.isPreviousExperience() ? "Yes" : "No"));
+        // Display height report for each team
+        for (Map.Entry<String, Map<String, Integer>> entry : teamHeightCount.entrySet()) {
+            System.out.println("Team: " + entry.getKey());
+            for (Map.Entry<String, Integer> heightEntry : entry.getValue().entrySet()) {
+                System.out.println("Height range " + heightEntry.getKey() + ": " + heightEntry.getValue() + " player(s)");
             }
         }
     }
+        
+        // Group players by height
+    private String determineHeightRange(int height){
+            if (height >= 35 && height <= 40) {
+                return "35-40";
+            } else if (height >= 41 && height <= 46) {
+               return "41-46";
+            } else if (height >= 47 && eight <= 50) {
+                return "47-50";
+            } else {
+               return "51+";
+            }
+        }
 
     private Player selectPlayerForRemoval(Team team) throws IOException {
         displayPlayersAlphabetically();
