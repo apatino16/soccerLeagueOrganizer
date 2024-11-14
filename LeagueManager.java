@@ -332,20 +332,30 @@ public class LeagueManager {
 
         // Check if there are enough teams
         if (mTeams.size() < 2) {
-            System.out.println("Not enough teams created. Please create at least two teams.");
-            return;
-        }
+        System.out.println("Not enough teams created. Please create at least two teams.");
+        return;
+    }
 
         // Distribute players
         Iterator<Team> teamIterator = mTeams.values().iterator();
-        for (Player player : players) {
+        Iterator<Player> playerIterator = players.iterator();
+
+        while (playerIterator.hasNext()) {
+        Player player = playerIterator.next();
+        boolean added = false;
+            
+        while(!added) {
             if (!teamIterator.hasNext()) {
                 teamIterator = mTeams.values().iterator(); // Reset iterator if end of collection reached
             }
             Team team = teamIterator.next();
+            if (team.getPlayers().size() < 11) { // Check if the team has less than 11 players
             team.getPlayers().add(player); // Add player to the current team
+            added = true;
+            }
         }
-
+        }
+        // Feedback to the user
         System.out.println("Teams have been built automatically.");
         for (Map.Entry<String, Team> entry : mTeams.entrySet()) {
             System.out.println("Team: " + entry.getKey() + " has " + entry.getValue().getPlayers().size() + " players.");
