@@ -201,12 +201,12 @@ public class LeagueManager {
 
         // Define height ranges
         String[] heightRanges = {"35-40", "41-46", "47-50", "51+"}; // Height treshold
-        Map<String, Map<String, Integer>>  teamHeightCounts = new TreeMap<>();
-        
+        Map<String, Map<String, Integer>> teamHeightCounts = new TreeMap<>();
+
         // Initialize the map for each team
         for (Team team : mTeams.values()) {
             Map<String, Integer> heightMap = new TreeMap<>();
-            for (String range : heightRanges){
+            for (String range : heightRanges) {
                 heightMap.put(range, 0); // Initialize counts for each range
             }
             teamHeightCounts.put(team.getTeamName(), heightMap);
@@ -222,26 +222,26 @@ public class LeagueManager {
         }
 
         // Display height report for each team
-        for (Map.Entry<String, Map<String, Integer>> entry : teamHeightCount.entrySet()) {
+        for (Map.Entry<String, Map<String, Integer>> entry : teamHeightCounts.entrySet()) {
             System.out.println("Team: " + entry.getKey());
             for (Map.Entry<String, Integer> heightEntry : entry.getValue().entrySet()) {
                 System.out.println("Height range " + heightEntry.getKey() + ": " + heightEntry.getValue() + " player(s)");
             }
         }
     }
-        
-        // Group players by height
-    private String determineHeightRange(int height){
-            if (height >= 35 && height <= 40) {
-                return "35-40";
-            } else if (height >= 41 && height <= 46) {
-               return "41-46";
-            } else if (height >= 47 && eight <= 50) {
-                return "47-50";
-            } else {
-               return "51+";
-            }
+
+    // Group players by height
+    private String determineHeightRange(int height) {
+        if (height >= 35 && height <= 40) {
+            return "35-40";
+        } else if (height >= 41 && height <= 46) {
+            return "41-46";
+        } else if (height >= 47 && height <= 50) {
+            return "47-50";
+        } else {
+            return "51+";
         }
+    }
 
     private Player selectPlayerForRemoval(Team team) throws IOException {
         displayPlayersAlphabetically();
