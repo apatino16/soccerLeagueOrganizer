@@ -5,7 +5,7 @@ public class Team {
     protected String mTeamName;
     protected String mCoachName;
 
-    public Team(String teamName, String coachName){
+    public Team(String teamName, String coachName) {
         mTeamName = teamName;
         mCoachName = coachName;
     }
@@ -21,10 +21,10 @@ public class Team {
     public String getTeamName() {
         return mTeamName;
     }
+
     public void setTeamName(String teamName) {
         mTeamName = teamName;
     }
 
 
-    
 }
