@@ -33,6 +33,16 @@ public class Player implements Comparable<Player>, Serializable {
         return previousExperience;
     }
 
+    private boolean isAssigned = false; // Flag to track if the player is assigned
+
+    public boolean isAssigned() {
+        return isAssigned;
+    }
+
+    public void setAssigned(boolean assigned) {
+        isAssigned = assigned;
+    }
+
     @Override
     public int compareTo(Player other) {
         // We always want to sort by last name then first name

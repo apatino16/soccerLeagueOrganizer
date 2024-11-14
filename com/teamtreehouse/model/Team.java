@@ -1,13 +1,17 @@
 package com.teamtreehouse.model;
 
+import java.util.HashSet;
+import java.util.Set;
 
 public class Team {
-    protected String mTeamName;
-    protected String mCoachName;
+    private String mTeamName;
+    private String mCoachName;
+    private Set<Player> players;
 
     public Team(String teamName, String coachName) {
         mTeamName = teamName;
         mCoachName = coachName;
+        this.players = new HashSet<>();
     }
 
     public String getCoachName() {
@@ -26,5 +30,11 @@ public class Team {
         mTeamName = teamName;
     }
 
+    public Set<Player> getPlayers(){
+        return players;
+    }
 
+    public void addPlayer(Player player){
+        players.add(player);
+    }
 }
