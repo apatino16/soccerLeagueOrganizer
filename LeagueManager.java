@@ -331,30 +331,31 @@ public class LeagueManager {
         Collections.shuffle(players); // Shuffle to randomize the distribution
 
         // Check if there are enough teams
-        if (mTeams.size() < 2) {
-        System.out.println("Not enough teams created. Please create at least two teams.");
-        return;
-    }
+        if (mTeams.isEmpty()) {
+            System.out.println("Not teams have been created. Please create at least two teams.");
+            return;
+        }
 
         // Distribute players
-        Iterator<Team> teamIterator = mTeams.values().iterator();
         Iterator<Player> playerIterator = players.iterator();
 
         while (playerIterator.hasNext()) {
-        Player player = playerIterator.next();
-        boolean added = false;
-            
-        while(!added) {
-            if (!teamIterator.hasNext()) {
-                teamIterator = mTeams.values().iterator(); // Reset iterator if end of collection reached
+            boolean playerAdded = false;
+
+            for (Team team : mTeams.values()) {
+                if (team.getPlayers().size() < 11) { // Check if the team has less than 11 players
+                    team.getPlayers().add(playerIterator.next()); // Add player to the current team
+                    playerAdded = true;
+                    break;
+                }
             }
-            Team team = teamIterator.next();
-            if (team.getPlayers().size() < 11) { // Check if the team has less than 11 players
-            team.getPlayers().add(player); // Add player to the current team
-            added = true;
+
+            if (!playerAdded) {
+                System.out.println("All teams are full. Unable to place additional players.");
+                break;
             }
         }
-        }
+
         // Feedback to the user
         System.out.println("Teams have been built automatically.");
         for (Map.Entry<String, Team> entry : mTeams.entrySet()) {
