@@ -88,6 +88,7 @@ public class LeagueManager {
         }
     }
 
+    // Display available menu options to the user
     public void printInstructions() {
         System.out.println("\nMenu Options:");
         for (Map.Entry<String, String> option : mMenu.entrySet()) {
@@ -95,6 +96,7 @@ public class LeagueManager {
         }
     }
 
+    // Prompts the user to create a new team and stores it in the TreeMap
     private void promptTeamCreation() throws IOException {
         System.out.print("Enter the team's name: ");
         String teamName = mReader.readLine();
@@ -129,6 +131,7 @@ public class LeagueManager {
         }
     }
 
+     // Adds a player to a selected team, ensuring the team does not exceed 11 players
     public void addPlayerToTeam() throws IOException {
         Team selectedTeam = selectTeam();
         if (selectedTeam == null) {
@@ -156,6 +159,7 @@ public class LeagueManager {
         System.out.println("Player " + selectedPlayer.getFirstName() + " " + selectedPlayer.getLastName() + " succesfully added to " + selectedTeam.getTeamName() + ".");
     }
 
+    // Allows user to remove a player from a selected team
     public void removePlayerFromTeam() throws IOException {
         Team selectedTeam = selectTeam();
         if (selectedTeam != null) {
@@ -243,6 +247,7 @@ public class LeagueManager {
         }
     }
 
+    // Selects a player for removal from a team
     private Player selectPlayerForRemoval(Team team) throws IOException {
         displayPlayersAlphabetically();
         Set<Player> players = team.getPlayers();
@@ -277,6 +282,7 @@ public class LeagueManager {
         }
     }
 
+     // Displays the league balance report detailing the number and percentage of experienced players per team
     private void displayLeagueBalanceReport() {
         if (mTeams.isEmpty()) {
             System.out.println("No teams available. Please create some teams first.");
@@ -304,6 +310,7 @@ public class LeagueManager {
         }
     }
 
+    // Displays the team roster, showing all players with their stats
     private void displayTeamRoster() throws IOException {
         Team selectedTeam = selectTeam();
         if (selectedTeam == null) {
@@ -380,6 +387,7 @@ public class LeagueManager {
         attemptToAssignPlayersFromWaitingList();
     }
 
+    // Attempts to assign players from the waiting list to any available team space
     private void attemptToAssignPlayersFromWaitingList() {
         if (waitingList.isEmpty()) {
             System.out.println("No players in the waiting list.");
@@ -396,6 +404,7 @@ public class LeagueManager {
         }
     }
 
+    // Attempts to add a player from the waiting list to a team that has space
     private boolean addPlayerToAvailableTeam(Player player) {
         for (Team team : mTeams.values()) {
             if (team.getPlayers().size() < 11) {
@@ -441,6 +450,7 @@ public class LeagueManager {
         }
     }
 
+    // Main method to start the program
     public static void main(String[] args) {
 
         Player[] players = Players.load();
