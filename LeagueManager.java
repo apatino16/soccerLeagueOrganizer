@@ -30,6 +30,7 @@ public class LeagueManager {
         mMenu.put("balance report", "View league balance report");
         mMenu.put("roster", "Print team roster");
         mMenu.put("quit", "Quit the program");
+        mMenu.put("auto build", "Automatically build fair teams");
     }
 
     // The  method provides a menu item that allows the Organizer to create a new team for the season
@@ -58,6 +59,9 @@ public class LeagueManager {
                         break;
                     case "roster":
                         displayTeamRoster();
+                        break;
+                    case "auto build":
+                        autoBuildTeams();
                         break;
                     case "quit":
                         System.out.println("Exiting the League manager program...");
@@ -304,7 +308,33 @@ public class LeagueManager {
         }
     }
 
+    // Automatic Team Building Method
+    private void autoBuildTeams() {
+    List<Player> players = new ArrayList<>(Arrays.asList(Players.load())); // Load all players
+    Collections.shuffle(players); // Shuffle to randomize the distribution
 
+    // Check if there are enough teams
+    if (mTeams.size() < 2) {
+        System.out.println("Not enough teams created. Please create at least two teams.");
+        return;
+    }
+
+    // Distribute players
+    Iterator<Team> teamIterator = mTeams.values().iterator();
+    for (Player player : players) {
+        if (!teamIterator.hasNext()) {
+            teamIterator = mTeams.values().iterator(); // Reset iterator if end of collection reached
+        }
+        Team team = teamIterator.next();
+        team.getTeamPlayers().add(player); // Add player to the current team
+    }
+
+    System.out.println("Teams have been built automatically.");
+    for (Map.Entry<String, Team> entry : mTeams.entrySet()) {
+        System.out.println("Team: " + entry.getKey() + " has " + entry.getValue().getTeamPlayers().size() + " players.");
+    }
+}
+    
     public static void main(String[] args) {
 
         Player[] players = Players.load();
