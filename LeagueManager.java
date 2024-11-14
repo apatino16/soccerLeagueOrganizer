@@ -36,7 +36,7 @@ public class LeagueManager {
         mMenu.put("rotate player", "Rotate a player from a team with one from the waiting list");
         mMenu.put("quit", "Quit the program");
         mMenu.put("auto build", "Automatically build fair teams");
-        
+
     }
 
     // The  method provides a menu item that allows the Organizer to create a new team for the season
@@ -349,81 +349,81 @@ public class LeagueManager {
 
     // Adding players to the waiting list
     private void addToWaitingList() throws IOException {
-    System.out.print("Enter player's first name: ");
-    String firstName = mReader.readLine();
-    System.out.print("Enter player's last name: ");
-    String lastName = mReader.readLine();
-    System.out.print("Enter player's height in inches: ");
-    int height = Integer.parseInt(mReader.readLine());
-    System.out.print("Does the player have previous experience? (yes/no): ");
-    boolean hasExperience = "yes".equalsIgnoreCase(mReader.readLine());
+        System.out.print("Enter player's first name: ");
+        String firstName = mReader.readLine();
+        System.out.print("Enter player's last name: ");
+        String lastName = mReader.readLine();
+        System.out.print("Enter player's height in inches: ");
+        int height = Integer.parseInt(mReader.readLine());
+        System.out.print("Does the player have previous experience? (yes/no): ");
+        boolean hasExperience = "yes".equalsIgnoreCase(mReader.readLine());
 
-    Player newPlayer = new Player(firstName, lastName, height, hasExperience);
-    waitingList.add(newPlayer);
-    System.out.println("Player added to the waiting list.");
-    attemptToAssignPlayersFromWaitingList();
-}
-
-private void attemptToAssignPlayersFromWaitingList() {
-    if (waitingList.isEmpty()) {
-        System.out.println("No players in the waiting list.");
-        return;
+        Player newPlayer = new Player(firstName, lastName, height, hasExperience);
+        waitingList.add(newPlayer);
+        System.out.println("Player added to the waiting list.");
+        attemptToAssignPlayersFromWaitingList();
     }
 
-    Iterator<Player> iterator = waitingList.iterator();
-    while (iterator.hasNext()) {
-        Player player = iterator.next();
-        if (addPlayerToAvailableTeam(player)) {
-            System.out.println("Player " + player.getFirstName() + " " + player.getLastName() + " added to a team from the waiting list.");
-            iterator.remove(); // Remove player from the waiting list after assigning to a team
+    private void attemptToAssignPlayersFromWaitingList() {
+        if (waitingList.isEmpty()) {
+            System.out.println("No players in the waiting list.");
+            return;
+        }
+
+        Iterator<Player> iterator = waitingList.iterator();
+        while (iterator.hasNext()) {
+            Player player = iterator.next();
+            if (addPlayerToAvailableTeam(player)) {
+                System.out.println("Player " + player.getFirstName() + " " + player.getLastName() + " added to a team from the waiting list.");
+                iterator.remove(); // Remove player from the waiting list after assigning to a team
+            }
         }
     }
-}
 
-private boolean addPlayerToAvailableTeam(Player player) {
-    for (Team team : mTeams.values()) {
-        if (team.getPlayers().size() < 11) { 
-            team.addPlayer(player);
-            player.setAssigned(true);
-            return true;
+    private boolean addPlayerToAvailableTeam(Player player) {
+        for (Team team : mTeams.values()) {
+            if (team.getPlayers().size() < 11) {
+                team.addPlayer(player);
+                player.setAssigned(true);
+                return true;
+            }
         }
+        return false;
     }
-    return false;
-}
 
     // Rotate Players from Waiting List
     private void rotatePlayerFromTeam() throws IOException {
-    Team selectedTeam = selectTeam();
-    if (selectedTeam == null) {
-        System.out.println("No team selected or no teams exist.");
-        return;
-    }
+        Team selectedTeam = selectTeam();
+        if (selectedTeam == null) {
+            System.out.println("No team selected or no teams exist.");
+            return;
+        }
 
-    if (selectedTeam.getPlayers().isEmpty()) {
-        System.out.println("No players in this team to rotate.");
-        return;
-    }
+        if (selectedTeam.getPlayers().isEmpty()) {
+            System.out.println("No players in this team to rotate.");
+            return;
+        }
 
-    Player playerToRemove = selectPlayerForRemoval(selectedTeam);
-    if (playerToRemove == null) {
-        System.out.println("No player selected for removal.");
-        return;
-    }
+        Player playerToRemove = selectPlayerForRemoval(selectedTeam);
+        if (playerToRemove == null) {
+            System.out.println("No player selected for removal.");
+            return;
+        }
 
-    // Remove the player from the team
-    selectedTeam.getPlayers().remove(playerToRemove);
-    System.out.println("Player " + playerToRemove.getFirstName() + " " + playerToRemove.getLastName() + " has been removed from " + selectedTeam.getTeamName());
+        // Remove the player from the team
+        selectedTeam.getPlayers().remove(playerToRemove);
+        System.out.println("Player " + playerToRemove.getFirstName() + " " + playerToRemove.getLastName() + " has been removed from " + selectedTeam.getTeamName());
 
-    // Attempt to add a player from the waiting list
-    if (!waitingList.isEmpty()) {
-        Player playerToAdd = waitingList.remove(0);  // Remove the first player from the waiting list
-        selectedTeam.getPlayers().add(playerToAdd);
-        playerToAdd.setAssigned(true);
-        System.out.println("Player " + playerToAdd.getFirstName() + " " + playerToAdd.getLastName() + " has been added to " + selectedTeam.getTeamName() + " from the waiting list.");
-    } else {
-        System.out.println("No players on the waiting list to add to the team.");
+        // Attempt to add a player from the waiting list
+        if (!waitingList.isEmpty()) {
+            Player playerToAdd = waitingList.remove(0);  // Remove the first player from the waiting list
+            selectedTeam.getPlayers().add(playerToAdd);
+            playerToAdd.setAssigned(true);
+            System.out.println("Player " + playerToAdd.getFirstName() + " " + playerToAdd.getLastName() + " has been added to " + selectedTeam.getTeamName() + " from the waiting list.");
+        } else {
+            System.out.println("No players on the waiting list to add to the team.");
+        }
     }
-}
 
     public static void main(String[] args) {
 
