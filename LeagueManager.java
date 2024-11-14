@@ -28,6 +28,7 @@ public class LeagueManager {
         mMenu.put("remove", "Remove a player from a team");
         mMenu.put("height report", " iew a team's height report");
         mMenu.put("balance report", "View league balance report");
+        mMenu.put("roster", "Print team roster");
         mMenu.put("quit", "Quit the program");
     }
 
@@ -51,6 +52,12 @@ public class LeagueManager {
                         break;
                     case "height report":
                         displayHeightReport();
+                        break;
+                    case "balance report":
+                        displayLeagueBalanceReport();
+                        break;
+                    case "roster":
+                        displayTeamRoster();
                         break;
                     case "quit":
                         System.out.println("Exiting the League manager program...");
@@ -241,6 +248,60 @@ public class LeagueManager {
                 }
             }
         }
+    
+    private void displayLeagueBalanceReport() {
+    if (mTeams.isEmpty()) {
+        System.out.println("No teams available. Please create some teams first.");
+        return;
+    }
+
+    Map<String, int[]> balanceMap = new TreeMap<>(); // To store team names and counts of experienced/inexperienced players
+
+    for (Map.Entry<String, Team> entry : mTeams.entrySet()) {
+        String teamName = entry.getKey();
+        Team team = entry.getValue();
+        int[] counts = {0, 0}; // First index for experienced, second for inexperienced
+
+        for (Player player : team.getTeamPlayers()) {
+            if (player.isPreviousExperience()) {
+                counts[0]++; // Increment experienced count
+            } else {
+                counts[1]++; // Increment inexperienced count
+            }
+        }
+
+        balanceMap.put(teamName, counts);
+    }
+
+    // Displaying the results
+    System.out.println("League Balance Report:");
+    for (Map.Entry<String, int[]> teamEntry : balanceMap.entrySet()) {
+        System.out.printf("Team: %s, Experienced Players: %d, Inexperienced Players: %d%n",
+                teamEntry.getKey(), teamEntry.getValue()[0], teamEntry.getValue()[1]);
+    }
+}
+
+    private void displayTeamRoster() {
+    Team selectedTeam = selectTeam();
+    if (selectedTeam == null) {
+        System.out.println("No team selected or no teams exist.");
+        return;
+    }
+
+    Set<Player> players = selectedTeam.getTeamPlayers();
+    if (players.isEmpty()) {
+        System.out.println("No players in this team.");
+        return;
+    }
+
+    System.out.println("Roster for Team: " + selectedTeam.getTeamName());
+    for (Player player : players) {
+        System.out.printf("Name: %s %s, Height: %d inches, Experienced: %s%n",
+                player.getFirstName(), player.getLastName(),
+                player.getHeightInInches(), player.isPreviousExperience() ? "Yes" : "No");
+    }
+}
+
 
         public static void main (String[]args){
 
