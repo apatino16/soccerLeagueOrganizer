@@ -5,6 +5,7 @@ import com.teamtreehouse.model.Team;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,6 +26,7 @@ public class LeagueManager {
         mMenu.put("create", "Create a new team");
         mMenu.put("add", "Add player to a team");
         mMenu.put("remove", "Remove a player from a team");
+        mMenu.put("height report", " iew a team's height report");
         mMenu.put("quit", "Quit the program");
     }
 
@@ -41,24 +43,13 @@ public class LeagueManager {
                         promptTeamCreation();
                         break;
                     case "add":
-                        if (!mTeams.isEmpty()) {
-                            Team selectedTeam = selectTeam();
-                            if (selectedTeam != null && selectedTeam.getPlayers().size() < 11) {
-                                Player selectedPlayer = selectPlayer();
-                                if (selectedPlayer != null) {
-                                    selectedTeam.addPlayer(selectedPlayer);
-                                    System.out.println("Player added to the team successfully.");
-                                }
-                            } else if (selectedTeam != null) {
-                                System.out.println("This team already has 11 players.");
-                            }
-                        } else {
-                            System.out.println("There are no available teams. Please create one first.");
-                        }
                         addPlayerToTeam();
                         break;
                     case "remove":
                         removePlayerFromTeam();
+                        break;
+                    case "height report":
+                        displayHeightReport();
                         break;
                     case "quit":
                         System.out.println("Exiting the League manager program...");
@@ -92,13 +83,13 @@ public class LeagueManager {
 
     // Prompts user to enter the index number for the team they wish to select
     private Team selectTeam() throws IOException {
-        if (mTeams.isEmpty()){
+        if (mTeams.isEmpty()) {
             System.out.println("No teams available. Please create one first.");
             return null;
         }
 
         int index = 1;
-        for (Map.Entry<String, Team> entry: mTeams.entrySet()) {
+        for (Map.Entry<String, Team> entry : mTeams.entrySet()) {
             System.out.println(index++ + " - " + entry.getKey());
         }
 
@@ -111,31 +102,6 @@ public class LeagueManager {
         } else {
             System.out.println("Invalid team index. Please try again.");
             return selectTeam(); // recursively call selectTeam if the input is invalid
-        }
-    }
-
-    // Select a player from the list of unassigned players
-    private Player selectPlayer() throws IOException {
-        displayPlayersAlphabetically();
-        System.out.println("Select a player by index:");
-        int index = Integer.parseInt(mReader.readLine()) - 1;
-        Player[] players = Players.load();
-        ArrayList<Player> unassignedPlayers = new ArrayList<>();
-        for (Player player : players) {
-            if (!player.isAssigned()) {
-                unassignedPlayers.add(player);
-                System.out.println(index++ + ", " + player.getFirstName() + " " + player.getLastName());
-            }
-        }
-        System.out.println("Select a player by index: ");
-        int playerIndex = Integer.parseInt(mReader.readLine()) - 1;
-        if (playerIndex >= 0 && playerIndex < unassignedPlayers.size()) {
-            Player selectedPlayer = unassignedPlayers.get(playerIndex);
-            selectedPlayer.setAssigned(true);
-            return selectedPlayer;
-        } else {
-            System.out.println("Invalid index. Please try again.");
-            return selectPlayer();
         }
     }
 
@@ -166,6 +132,79 @@ public class LeagueManager {
         System.out.println("Player " + selectedPlayer.getFirstName() + " " + selectedPlayer.getLastName() + " succesfully added to " + selectedTeam.getTeamName() + ".");
     }
 
+    public void removePlayerFromTeam() throws IOException {
+        Team selectedTeam = selectTeam();
+        if (selectedTeam != null) {
+            Player playerToRemove = selectPlayerForRemoval(selectedTeam);
+            if (playerToRemove != null) {
+                selectedTeam.getPlayers().remove(playerToRemove);
+                playerToRemove.setAssigned(false);
+                System.out.println("Player " + playerToRemove.getFirstName() + " " + playerToRemove.getLastName() + " has been removed from " + selectedTeam.getTeamName());
+            }
+        } else {
+            System.out.println("No team selected.");
+        }
+    }
+
+    // Select a player from the list of unassigned players
+    private Player selectPlayer() throws IOException {
+        displayPlayersAlphabetically();
+        System.out.println("Select a player by index:");
+        int playerIndex = Integer.parseInt(mReader.readLine()) - 1;
+        Player[] players = Players.load();
+        ArrayList<Player> unassignedPlayers = new ArrayList<>();
+        for (Player player : players) {
+            if (!player.isAssigned()) {
+                unassignedPlayers.add(player);
+            }
+        }
+        if (playerIndex >= 0 && playerIndex < unassignedPlayers.size()) {
+            Player selectedPlayer = unassignedPlayers.get(playerIndex);
+            selectedPlayer.setAssigned(true);
+            return selectedPlayer;
+        } else {
+            System.out.println("Invalid index. Please try again.");
+            return selectPlayer();
+        }
+    }
+
+    // Display Height Report
+    private void displayHeightReport(Team team) {
+        if (team == null || team.getPlayers().isEmpty()) {
+            System.out.println("No players in the team or team not selected.");
+            return;
+        }
+
+        // Define height ranges
+        int[] heightRanges = {35, 40, 46, 50, 55, 60}; // Height treshold
+        Map<String, List<Player>> heightGroups = new TreeMap<>();
+
+        // Initializes players by height
+        for (int i = 0; i < heightRanges.length - 1; i++) {
+            heightGroups.get(heightRanges[i] + "-" + (heightRanges[i + 1] - 1), new ArrayList<>());
+        }
+
+        // Group players by height
+        for (Player player : team.getPlayers()) {
+            for (int i = 0; i < heightRanges.length - 1; i++) {
+                if (player.getHeightInInches() >= heightRanges[i] && player.getHeightInInches() < heightRanges[i + 1]) {
+                    heightGroups.get(heightRanges[i] + "-" + (heightRanges[i + 1] - 1)).add(player);
+                    break;
+                }
+            }
+        }
+
+        // Display height groups
+        for (Map.Entry<String, List<Player>> entry : heightGroups.entrySet()) {
+            String range = entry.getKey();
+            List<Player> players = entry.getvalue();
+            System.out.println("Height range " + range + " inches:");
+            for (Player p : players) {
+                System.out.println(p.getFirstName() + " " + p.getLastName() + " - " + p.getHeightInInches() + " inches");
+            }
+        }
+    }
+
     private Player selectPlayerForRemoval(Team team) throws IOException {
         displayPlayersAlphabetically();
         Set<Player> players = team.getPlayers();
@@ -187,26 +226,14 @@ public class LeagueManager {
         }
     }
 
-    public void removePlayerFromTeam() throws IOException {
-        Team selectedTeam = selectTeam();
-        if (selectedTeam != null){
-            Player playerToRemove = selectPlayerForRemoval(selectedTeam);
-            if (playerToRemove != null){
-                selectedTeam.getPlayers().remove(playerToRemove);
-                playerToRemove.setAssigned(false);
-                System.out.println("Player " + playerToRemove.getFirstName() + " " + playerToRemove.getLastName() + " has been removed from " + selectedTeam.getTeamName());
-            }
-        }
-    }
-
     // Method to display players alphabetically
-    private void displayPlayersAlphabetically() throws IOException{
+    private void displayPlayersAlphabetically() throws IOException {
         List<Player> players = new ArrayList<>(Arrays.asList(Players.load()));
         Collections.sort(players);
 
         System.out.println("Available Players:");
-        for (Player player : players){
-            if (!player.isAssigned()){
+        for (Player player : players) {
+            if (!player.isAssigned()) {
                 System.out.println(player.getLastName() + ", " + player.getFirstName() + " - Height: " + player.getHeightInInches() + " inches, Experience: " + (player.isPreviousExperience() ? "Yes" : "No"));
             }
         }
