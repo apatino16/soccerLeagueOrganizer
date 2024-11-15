@@ -1,30 +1,16 @@
 package com.teamtreehouse.model;
 
-import com.teamtreehouse.model.Player;
-import com.teamtreehouse.model.Players;
-import com.teamtreehouse.model.Team;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 
 
 public class LeagueManager {
-    private TreeMap<String, Team> mTeams = new TreeMap<>();
-    private BufferedReader mReader = new BufferedReader(new InputStreamReader(System.in));
-    private Map<String, String> mMenu;
-    private List<Player> waitingList = new ArrayList<>();
+    private final TreeMap<String, Team> mTeams = new TreeMap<>();
+    private final BufferedReader mReader = new BufferedReader(new InputStreamReader(System.in));
+    private final Map<String, String> mMenu;
+    private final List<Player> waitingList = new ArrayList<>();
 
     // Method that displays menu options to the user
     public LeagueManager() {
@@ -102,22 +88,22 @@ public class LeagueManager {
     // Prompts the user to create a new team and stores it in the TreeMap
     private void promptTeamCreation() throws IOException {
         // Calculate the max # of teams allowed
-        int maxTeams = Players.load().length/11;
-        
+        int maxTeams = Players.load().length / 11;
+
         if (mTeams.size() >= maxTeams) {
-        System.out.println("Cannot create more teams than there are players.");
-        return;
-    }
+            System.out.println("Cannot create more teams than there are players.");
+            return;
+        }
         System.out.print("Enter the team's name: ");
         String teamName = mReader.readLine();
         System.out.print("Enter the coach's name: ");
         String coachName = mReader.readLine();
 
         // Check if the team already exists to avoid duplicate team names
-    if (mTeams.containsKey(teamName)) {
-        System.out.println("A team with this name already exists. Please choose a different name.");
-        return;
-    }
+        if (mTeams.containsKey(teamName)) {
+            System.out.println("A team with this name already exists. Please choose a different name.");
+            return;
+        }
         // Create the new team and add it to the TreeMap
         Team newTeam = new Team(teamName, coachName);
         mTeams.put(teamName, newTeam);
@@ -148,7 +134,7 @@ public class LeagueManager {
         }
     }
 
-     // Adds a player to a selected team, ensuring the team does not exceed 11 players
+    // Adds a player to a selected team, ensuring the team does not exceed 11 players
     public void addPlayerToTeam() throws IOException {
         Team selectedTeam = selectTeam();
         if (selectedTeam == null) {
@@ -162,7 +148,7 @@ public class LeagueManager {
             System.out.println("This team already has 11 players. No more players can be added.");
             return;
         }
-        
+
         // display unassigned players and allow the user to select one
         displayAvailablePlayers(); // Show available players to add
 
@@ -170,9 +156,9 @@ public class LeagueManager {
         int playerIndex = Integer.parseInt(mReader.readLine()) - 1; // Assuming player index is input by user
         List<Player> allPlayers = new ArrayList<>(Arrays.asList(Players.load()));
         allPlayers.removeIf(Player::isAssigned); // Again filtering to make sure
-        
+
         // Add the player to the team
-       if (playerIndex >= 0 && playerIndex < allPlayers.size()) {
+        if (playerIndex >= 0 && playerIndex < allPlayers.size()) {
             Player selectedPlayer = allPlayers.get(playerIndex);
             selectedTeam.getPlayers().add(selectedPlayer);
             selectedPlayer.setAssigned(true);
@@ -191,7 +177,7 @@ public class LeagueManager {
                 selectedTeam.getPlayers().remove(playerToRemove);
                 playerToRemove.setAssigned(false);
                 System.out.println("Player " + playerToRemove.getFirstName() + " " + playerToRemove.getLastName() + " has been removed from " + selectedTeam.getTeamName());
-                attemptToAssignPlayersFromWaitingList(); 
+                attemptToAssignPlayersFromWaitingList();
             }
         } else {
             System.out.println("No team selected.");
@@ -220,26 +206,26 @@ public class LeagueManager {
         }
     }
 
-        // Method to display unassigned players for selection
-private void displayAvailablePlayers() throws IOException {
-    List<Player> allPlayers = new ArrayList<>(Arrays.asList(Players.load())); // Load all players
-    allPlayers.removeIf(Player::isAssigned); // Remove players who are already assigned to any team
+    // Method to display unassigned players for selection
+    private void displayAvailablePlayers() {
+        List<Player> allPlayers = new ArrayList<>(Arrays.asList(Players.load())); // Load all players
+        allPlayers.removeIf(Player::isAssigned); // Remove players who are already assigned to any team
 
-    if (allPlayers.isEmpty()) {
-        System.out.println("There are no available players to add.");
-        return;
+        if (allPlayers.isEmpty()) {
+            System.out.println("There are no available players to add.");
+            return;
+        }
+
+        System.out.println("Available Players:");
+        for (Player player : allPlayers) {
+            System.out.printf("%s %s - Height: %d, Experienced: %s%n",
+                    player.getFirstName(), player.getLastName(),
+                    player.getHeightInInches(),
+                    player.isPreviousExperience() ? "Yes" : "No");
+        }
     }
 
-    System.out.println("Available Players:");
-    for (Player player : allPlayers) {
-        System.out.printf("%s %s - Height: %d, Experienced: %s%n", 
-                          player.getFirstName(), player.getLastName(),
-                          player.getHeightInInches(), 
-                          player.isPreviousExperience() ? "Yes" : "No");
-    }
-}
-
-         // Displays the league balance report detailing the number and percentage of experienced players per team
+    // Displays the league balance report detailing the number and percentage of experienced players per team
     private void displayLeagueBalanceReport() {
         if (mTeams.isEmpty()) {
             System.out.println("No teams available. Please create some teams first.");
@@ -277,7 +263,7 @@ private void displayAvailablePlayers() throws IOException {
 
         List<Player> sortedPlayers = new ArrayList<>(selectedTeam.getPlayers());
         sortedPlayers.sort(Comparator.comparing(Player::getLastName).thenComparing(Player::getFirstName));
-       
+
         System.out.println("Roster for Team: " + selectedTeam.getTeamName());
         for (Player player : sortedPlayers) {
             System.out.printf("Name: %s %s, Height: %d inches, Experienced: %s%n",
@@ -286,7 +272,7 @@ private void displayAvailablePlayers() throws IOException {
         }
     }
 
-     // Automatic Team Building Method
+    // Automatic Team Building Method
     private void autoBuildTeams() {
         List<Player> players = new ArrayList<>(Arrays.asList(Players.load())); // Load all players
         Collections.shuffle(players); // Shuffle to randomize the distribution
@@ -324,7 +310,7 @@ private void displayAvailablePlayers() throws IOException {
         }
     }
 
-     // Adding players to the waiting list
+    // Adding players to the waiting list
     private void addToWaitingList() throws IOException {
         System.out.print("Enter player's first name: ");
         String firstName = mReader.readLine();
@@ -341,7 +327,7 @@ private void displayAvailablePlayers() throws IOException {
         attemptToAssignPlayersFromWaitingList();
     }
 
-        // Attempts to assign players from the waiting list to any available team space
+    // Attempts to assign players from the waiting list to any available team space
     private void attemptToAssignPlayersFromWaitingList() {
         Iterator<Player> iterator = waitingList.iterator();
         while (iterator.hasNext()) {
@@ -354,7 +340,7 @@ private void displayAvailablePlayers() throws IOException {
         if (waitingList.isEmpty()) {
             System.out.println("All waiting list players have been assigned to teams.");
         } else {
-        System.out.println("Some players are still on the waiting list. Not all teams have space available.");
+            System.out.println("Some players are still on the waiting list. Not all teams have space available.");
         }
     }
 
@@ -395,7 +381,7 @@ private void displayAvailablePlayers() throws IOException {
 
         // Attempt to add a player from the waiting list
         if (!waitingList.isEmpty()) {
-            Player playerToAdd = waitingList.remove(0);  // Remove the first player from the waiting list
+            Player playerToAdd = waitingList.removeFirst();  // Remove the first player from the waiting list
             selectedTeam.getPlayers().add(playerToAdd);
             playerToAdd.setAssigned(true);
             System.out.println("Player " + playerToAdd.getFirstName() + " " + playerToAdd.getLastName() + " has been added to " + selectedTeam.getTeamName() + " from the waiting list.");
@@ -403,29 +389,7 @@ private void displayAvailablePlayers() throws IOException {
             System.out.println("No players on the waiting list to add to the team.");
         }
     }
-    
-    // Select a player from the list of unassigned players
-    private Player selectPlayer() throws IOException {
-        displayPlayersAlphabetically();
-        System.out.println("Select a player by index:");
-        int playerIndex = Integer.parseInt(mReader.readLine()) - 1;
-        Player[] players = Players.load();
-        ArrayList<Player> unassignedPlayers = new ArrayList<>();
-        for (Player player : players) {
-            if (!player.isAssigned()) {
-                unassignedPlayers.add(player);
-            }
-        }
-        if (playerIndex >= 0 && playerIndex < unassignedPlayers.size()) {
-            Player selectedPlayer = unassignedPlayers.get(playerIndex);
-            selectedPlayer.setAssigned(true);
-            return selectedPlayer;
-        } else {
-            System.out.println("Invalid index. Please try again.");
-            return selectPlayer();
-        }
-    }
-    
+
     // Display Height Report
     private void displayHeightReport() throws IOException {
         if (mTeams.isEmpty()) {
@@ -434,17 +398,7 @@ private void displayAvailablePlayers() throws IOException {
         }
 
         // Define height ranges
-        String[] heightRanges = {"35-40", "41-46", "47-50", "51+"}; // Height treshold
-        Map<String, Map<String, Integer>> teamHeightCounts = new TreeMap<>();
-
-        // Initialize the map for each team
-        for (Team team : mTeams.values()) {
-            Map<String, Integer> heightMap = new TreeMap<>();
-            for (String range : heightRanges) {
-                heightMap.put(range, 0); // Initialize counts for each range
-            }
-            teamHeightCounts.put(team.getTeamName(), heightMap);
-        }
+        Map<String, Map<String, Integer>> teamHeightCounts = getStringMapMap();
 
         // Count players in each height range for each team 
         for (Team team : mTeams.values()) {
@@ -464,6 +418,21 @@ private void displayAvailablePlayers() throws IOException {
         }
     }
 
+    private Map<String, Map<String, Integer>> getStringMapMap() {
+        String[] heightRanges = {"35-40", "41-46", "47-50", "51+"}; // Height threshold
+        Map<String, Map<String, Integer>> teamHeightCounts = new TreeMap<>();
+
+        // Initialize the map for each team
+        for (Team team : mTeams.values()) {
+            Map<String, Integer> heightMap = new TreeMap<>();
+            for (String range : heightRanges) {
+                heightMap.put(range, 0); // Initialize counts for each range
+            }
+            teamHeightCounts.put(team.getTeamName(), heightMap);
+        }
+        return teamHeightCounts;
+    }
+
     // Group players by height
     private String determineHeightRange(int height) {
         if (height >= 35 && height <= 40) {
@@ -478,11 +447,11 @@ private void displayAvailablePlayers() throws IOException {
     }
 
     // Method to display players alphabetically
-    private void displayPlayersAlphabetically() throws IOException {
+    private void displayPlayersAlphabetically() {
         List<Player> players = new ArrayList<>(Arrays.asList(Players.load()));
         players.removeIf(Player::isAssigned); // Remove assigned players
         players.sort(Comparator.comparing(Player::getLastName).thenComparing(Player::getFirstName));
-    
+
         System.out.println("Available Players:");
         for (Player player : players) {
             System.out.println(player.getLastName() + ", " + player.getFirstName() + " - Height: " + player.getHeightInInches() + " inches, Experience: " + (player.isPreviousExperience() ? "Yes" : "No"));
