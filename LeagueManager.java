@@ -162,18 +162,24 @@ public class LeagueManager {
             System.out.println("This team already has 11 players. No more players can be added.");
             return;
         }
-
+        
         // display unassigned players and allow the user to select one
-        Player selectedPlayer = selectPlayer();
-        if (selectedPlayer == null) {
-            System.out.println("No player selected or no available players.");
-            return;
-        }
+        displayAvailablePlayers(); // Show available players to add
 
+        System.out.print("Enter the index of the player to add: ");
+        int playerIndex = Integer.parseInt(mReader.readLine()) - 1; // Assuming player index is input by user
+        List<Player> allPlayers = new ArrayList<>(Arrays.asList(Players.load()));
+        allPlayers.removeIf(Player::isAssigned); // Again filtering to make sure
+        
         // Add the player to the team
-        selectedTeam.getPlayers().add(selectedPlayer);
-        selectedPlayer.setAssigned(true); // Mark the player as assigned to a team
-        System.out.println("Player " + selectedPlayer.getFirstName() + " " + selectedPlayer.getLastName() + " succesfully added to " + selectedTeam.getTeamName() + ".");
+       if (playerIndex >= 0 && playerIndex < allPlayers.size()) {
+            Player selectedPlayer = allPlayers.get(playerIndex);
+            selectedTeam.getPlayers().add(selectedPlayer);
+            selectedPlayer.setAssigned(true);
+            System.out.println("Player added successfully to " + selectedTeam.getTeamName());
+        } else {
+            System.out.println("Invalid player index. Please try again.");
+        }
     }
 
     // Allows user to remove a player from a selected team and check for open team spots
@@ -189,79 +195,6 @@ public class LeagueManager {
             }
         } else {
             System.out.println("No team selected.");
-        }
-    }
-
-    // Select a player from the list of unassigned players
-    private Player selectPlayer() throws IOException {
-        displayPlayersAlphabetically();
-        System.out.println("Select a player by index:");
-        int playerIndex = Integer.parseInt(mReader.readLine()) - 1;
-        Player[] players = Players.load();
-        ArrayList<Player> unassignedPlayers = new ArrayList<>();
-        for (Player player : players) {
-            if (!player.isAssigned()) {
-                unassignedPlayers.add(player);
-            }
-        }
-        if (playerIndex >= 0 && playerIndex < unassignedPlayers.size()) {
-            Player selectedPlayer = unassignedPlayers.get(playerIndex);
-            selectedPlayer.setAssigned(true);
-            return selectedPlayer;
-        } else {
-            System.out.println("Invalid index. Please try again.");
-            return selectPlayer();
-        }
-    }
-
-    // Display Height Report
-    private void displayHeightReport() throws IOException {
-        if (mTeams.isEmpty()) {
-            System.out.println("No teams have been created yet.");
-            return;
-        }
-
-        // Define height ranges
-        String[] heightRanges = {"35-40", "41-46", "47-50", "51+"}; // Height treshold
-        Map<String, Map<String, Integer>> teamHeightCounts = new TreeMap<>();
-
-        // Initialize the map for each team
-        for (Team team : mTeams.values()) {
-            Map<String, Integer> heightMap = new TreeMap<>();
-            for (String range : heightRanges) {
-                heightMap.put(range, 0); // Initialize counts for each range
-            }
-            teamHeightCounts.put(team.getTeamName(), heightMap);
-        }
-
-        // Count players in each height range for each team 
-        for (Team team : mTeams.values()) {
-            for (Player player : team.getPlayers()) {
-                String heightKey = determineHeightRange(player.getHeightInInches());
-                Map<String, Integer> counts = teamHeightCounts.get(team.getTeamName());
-                counts.put(heightKey, counts.get(heightKey) + 1);
-            }
-        }
-
-        // Display height report for each team
-        for (Map.Entry<String, Map<String, Integer>> entry : teamHeightCounts.entrySet()) {
-            System.out.println("Team: " + entry.getKey());
-            for (Map.Entry<String, Integer> heightEntry : entry.getValue().entrySet()) {
-                System.out.println("Height range " + heightEntry.getKey() + ": " + heightEntry.getValue() + " player(s)");
-            }
-        }
-    }
-
-    // Group players by height
-    private String determineHeightRange(int height) {
-        if (height >= 35 && height <= 40) {
-            return "35-40";
-        } else if (height >= 41 && height <= 46) {
-            return "41-46";
-        } else if (height >= 47 && height <= 50) {
-            return "47-50";
-        } else {
-            return "51+";
         }
     }
 
@@ -287,19 +220,26 @@ public class LeagueManager {
         }
     }
 
-    // Method to display players alphabetically
-    private void displayPlayersAlphabetically() throws IOException {
-        List<Player> players = new ArrayList<>(Arrays.asList(Players.load()));
-        players.removeIf(Player::isAssigned); // Remove assigned players
-        players.sort(Comparator.comparing(Player::getLastName).thenComparing(Player::getFirstName));
-    
-        System.out.println("Available Players:");
-        for (Player player : players) {
-            System.out.println(player.getLastName() + ", " + player.getFirstName() + " - Height: " + player.getHeightInInches() + " inches, Experience: " + (player.isPreviousExperience() ? "Yes" : "No"));
-        }
+        // Method to display unassigned players for selection
+private void displayAvailablePlayers() throws IOException {
+    List<Player> allPlayers = new ArrayList<>(Arrays.asList(Players.load())); // Load all players
+    allPlayers.removeIf(Player::isAssigned); // Remove players who are already assigned to any team
+
+    if (allPlayers.isEmpty()) {
+        System.out.println("There are no available players to add.");
+        return;
     }
 
-     // Displays the league balance report detailing the number and percentage of experienced players per team
+    System.out.println("Available Players:");
+    for (Player player : allPlayers) {
+        System.out.printf("%s %s - Height: %d, Experienced: %s%n", 
+                          player.getFirstName(), player.getLastName(),
+                          player.getHeightInInches(), 
+                          player.isPreviousExperience() ? "Yes" : "No");
+    }
+}
+
+         // Displays the league balance report detailing the number and percentage of experienced players per team
     private void displayLeagueBalanceReport() {
         if (mTeams.isEmpty()) {
             System.out.println("No teams available. Please create some teams first.");
@@ -346,7 +286,7 @@ public class LeagueManager {
         }
     }
 
-    // Automatic Team Building Method
+     // Automatic Team Building Method
     private void autoBuildTeams() {
         List<Player> players = new ArrayList<>(Arrays.asList(Players.load())); // Load all players
         Collections.shuffle(players); // Shuffle to randomize the distribution
@@ -384,7 +324,7 @@ public class LeagueManager {
         }
     }
 
-    // Adding players to the waiting list
+     // Adding players to the waiting list
     private void addToWaitingList() throws IOException {
         System.out.print("Enter player's first name: ");
         String firstName = mReader.readLine();
@@ -401,7 +341,7 @@ public class LeagueManager {
         attemptToAssignPlayersFromWaitingList();
     }
 
-    // Attempts to assign players from the waiting list to any available team space
+        // Attempts to assign players from the waiting list to any available team space
     private void attemptToAssignPlayersFromWaitingList() {
         Iterator<Player> iterator = waitingList.iterator();
         while (iterator.hasNext()) {
@@ -461,6 +401,91 @@ public class LeagueManager {
             System.out.println("Player " + playerToAdd.getFirstName() + " " + playerToAdd.getLastName() + " has been added to " + selectedTeam.getTeamName() + " from the waiting list.");
         } else {
             System.out.println("No players on the waiting list to add to the team.");
+        }
+    }
+    
+    // Select a player from the list of unassigned players
+    private Player selectPlayer() throws IOException {
+        displayPlayersAlphabetically();
+        System.out.println("Select a player by index:");
+        int playerIndex = Integer.parseInt(mReader.readLine()) - 1;
+        Player[] players = Players.load();
+        ArrayList<Player> unassignedPlayers = new ArrayList<>();
+        for (Player player : players) {
+            if (!player.isAssigned()) {
+                unassignedPlayers.add(player);
+            }
+        }
+        if (playerIndex >= 0 && playerIndex < unassignedPlayers.size()) {
+            Player selectedPlayer = unassignedPlayers.get(playerIndex);
+            selectedPlayer.setAssigned(true);
+            return selectedPlayer;
+        } else {
+            System.out.println("Invalid index. Please try again.");
+            return selectPlayer();
+        }
+    }
+    
+    // Display Height Report
+    private void displayHeightReport() throws IOException {
+        if (mTeams.isEmpty()) {
+            System.out.println("No teams have been created yet.");
+            return;
+        }
+
+        // Define height ranges
+        String[] heightRanges = {"35-40", "41-46", "47-50", "51+"}; // Height treshold
+        Map<String, Map<String, Integer>> teamHeightCounts = new TreeMap<>();
+
+        // Initialize the map for each team
+        for (Team team : mTeams.values()) {
+            Map<String, Integer> heightMap = new TreeMap<>();
+            for (String range : heightRanges) {
+                heightMap.put(range, 0); // Initialize counts for each range
+            }
+            teamHeightCounts.put(team.getTeamName(), heightMap);
+        }
+
+        // Count players in each height range for each team 
+        for (Team team : mTeams.values()) {
+            for (Player player : team.getPlayers()) {
+                String heightKey = determineHeightRange(player.getHeightInInches());
+                Map<String, Integer> counts = teamHeightCounts.get(team.getTeamName());
+                counts.put(heightKey, counts.get(heightKey) + 1);
+            }
+        }
+
+        // Display height report for each team
+        for (Map.Entry<String, Map<String, Integer>> entry : teamHeightCounts.entrySet()) {
+            System.out.println("Team: " + entry.getKey());
+            for (Map.Entry<String, Integer> heightEntry : entry.getValue().entrySet()) {
+                System.out.println("Height range " + heightEntry.getKey() + ": " + heightEntry.getValue() + " player(s)");
+            }
+        }
+    }
+
+    // Group players by height
+    private String determineHeightRange(int height) {
+        if (height >= 35 && height <= 40) {
+            return "35-40";
+        } else if (height >= 41 && height <= 46) {
+            return "41-46";
+        } else if (height >= 47 && height <= 50) {
+            return "47-50";
+        } else {
+            return "51+";
+        }
+    }
+
+    // Method to display players alphabetically
+    private void displayPlayersAlphabetically() throws IOException {
+        List<Player> players = new ArrayList<>(Arrays.asList(Players.load()));
+        players.removeIf(Player::isAssigned); // Remove assigned players
+        players.sort(Comparator.comparing(Player::getLastName).thenComparing(Player::getFirstName));
+    
+        System.out.println("Available Players:");
+        for (Player player : players) {
+            System.out.println(player.getLastName() + ", " + player.getFirstName() + " - Height: " + player.getHeightInInches() + " inches, Experience: " + (player.isPreviousExperience() ? "Yes" : "No"));
         }
     }
 
