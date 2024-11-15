@@ -1,3 +1,5 @@
+package com.teamtreehouse.model;
+
 import com.teamtreehouse.model.Player;
 import com.teamtreehouse.model.Players;
 import com.teamtreehouse.model.Team;
@@ -99,8 +101,8 @@ public class LeagueManager {
 
     // Prompts the user to create a new team and stores it in the TreeMap
     private void promptTeamCreation() throws IOException {
-        // Calculate the maxx # of teams allowed
-        int maxTeams = Player.load().length/11;
+        // Calculate the max # of teams allowed
+        int maxTeams = Players.load().length/11;
         
         if (mTeams.size() >= maxTeams) {
         System.out.println("Cannot create more teams than there are players.");
@@ -464,7 +466,6 @@ public class LeagueManager {
 
     // Main method to start the program
     public static void main(String[] args) {
-
         Player[] players = Players.load();
         System.out.printf("There are currently %d registered players.%n", players.length);
         new LeagueManager().runMenu();
