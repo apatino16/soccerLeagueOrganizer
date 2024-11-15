@@ -98,6 +98,10 @@ public class LeagueManager {
 
     // Prompts the user to create a new team and stores it in the TreeMap
     private void promptTeamCreation() throws IOException {
+        if (mTeams.size() >= Players.load().length) {
+        System.out.println("Cannot create more teams than there are players.");
+        return;
+    }
         System.out.print("Enter the team's name: ");
         String teamName = mReader.readLine();
         System.out.print("Enter the coach's name: ");
@@ -272,13 +276,12 @@ public class LeagueManager {
     // Method to display players alphabetically
     private void displayPlayersAlphabetically() throws IOException {
         List<Player> players = new ArrayList<>(Arrays.asList(Players.load()));
-        Collections.sort(players);
-
+        players.removeIf(Player::isAssigned); // Remove assigned players
+        players.sort(Comparator.comparing(Player::getLastName).thenComparing(Player::getFirstName));
+    
         System.out.println("Available Players:");
         for (Player player : players) {
-            if (!player.isAssigned()) {
-                System.out.println(player.getLastName() + ", " + player.getFirstName() + " - Height: " + player.getHeightInInches() + " inches, Experience: " + (player.isPreviousExperience() ? "Yes" : "No"));
-            }
+            System.out.println(player.getLastName() + ", " + player.getFirstName() + " - Height: " + player.getHeightInInches() + " inches, Experience: " + (player.isPreviousExperience() ? "Yes" : "No"));
         }
     }
 
