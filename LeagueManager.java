@@ -318,14 +318,11 @@ public class LeagueManager {
             return;
         }
 
-        Set<Player> players = selectedTeam.getPlayers();
-        if (players.isEmpty()) {
-            System.out.println("No players in this team.");
-            return;
-        }
-
+        List<Player> sortedPlayers = new ArrayList<>(selectedTeam.getPlayers());
+        sortedPlayers.sort(Comparator.comparing(Player::getLastName).thenComparing(Player::getFirstName));
+       
         System.out.println("Roster for Team: " + selectedTeam.getTeamName());
-        for (Player player : players) {
+        for (Player player : sortedPlayers) {
             System.out.printf("Name: %s %s, Height: %d inches, Experienced: %s%n",
                     player.getFirstName(), player.getLastName(),
                     player.getHeightInInches(), player.isPreviousExperience() ? "Yes" : "No");
