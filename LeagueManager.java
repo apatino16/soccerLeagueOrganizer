@@ -99,7 +99,10 @@ public class LeagueManager {
 
     // Prompts the user to create a new team and stores it in the TreeMap
     private void promptTeamCreation() throws IOException {
-        if (mTeams.size() >= Players.load().length) {
+        // Calculate the maxx # of teams allowed
+        int maxTeams = Player.load().length/11;
+        
+        if (mTeams.size() >= maxTeams) {
         System.out.println("Cannot create more teams than there are players.");
         return;
     }
@@ -107,6 +110,13 @@ public class LeagueManager {
         String teamName = mReader.readLine();
         System.out.print("Enter the coach's name: ");
         String coachName = mReader.readLine();
+
+        // Check if the team already exists to avoid duplicate team names
+    if (mTeams.containsKey(teamName)) {
+        System.out.println("A team with this name already exists. Please choose a different name.");
+        return;
+    }
+        // Create the new team and add it to the TreeMap
         Team newTeam = new Team(teamName, coachName);
         mTeams.put(teamName, newTeam);
         System.out.println("Team created successfully: " + teamName);
