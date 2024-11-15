@@ -174,7 +174,7 @@ public class LeagueManager {
         System.out.println("Player " + selectedPlayer.getFirstName() + " " + selectedPlayer.getLastName() + " succesfully added to " + selectedTeam.getTeamName() + ".");
     }
 
-    // Allows user to remove a player from a selected team
+    // Allows user to remove a player from a selected team and check for open team spots
     public void removePlayerFromTeam() throws IOException {
         Team selectedTeam = selectTeam();
         if (selectedTeam != null) {
@@ -183,6 +183,7 @@ public class LeagueManager {
                 selectedTeam.getPlayers().remove(playerToRemove);
                 playerToRemove.setAssigned(false);
                 System.out.println("Player " + playerToRemove.getFirstName() + " " + playerToRemove.getLastName() + " has been removed from " + selectedTeam.getTeamName());
+                attemptToAssignPlayersFromWaitingList(); 
             }
         } else {
             System.out.println("No team selected.");
@@ -262,7 +263,7 @@ public class LeagueManager {
         }
     }
 
-    // Selects a player for removal from a team
+    // Selects a player for removal from a team 
     private Player selectPlayerForRemoval(Team team) throws IOException {
         displayPlayersAlphabetically();
         Set<Player> players = team.getPlayers();
@@ -400,11 +401,6 @@ public class LeagueManager {
 
     // Attempts to assign players from the waiting list to any available team space
     private void attemptToAssignPlayersFromWaitingList() {
-        if (waitingList.isEmpty()) {
-            System.out.println("No players in the waiting list.");
-            return;
-        }
-
         Iterator<Player> iterator = waitingList.iterator();
         while (iterator.hasNext()) {
             Player player = iterator.next();
@@ -413,13 +409,18 @@ public class LeagueManager {
                 iterator.remove(); // Remove player from the waiting list after assigning to a team
             }
         }
+        if (waitingList.isEmpty()) {
+            System.out.println("All waiting list players have been assigned to teams.");
+        } else {
+        System.out.println("Some players are still on the waiting list. Not all teams have space available.");
+        }
     }
 
     // Attempts to add a player from the waiting list to a team that has space
     private boolean addPlayerToAvailableTeam(Player player) {
         for (Team team : mTeams.values()) {
             if (team.getPlayers().size() < 11) {
-                team.addPlayer(player);
+                team.getPlayers().add(player);
                 player.setAssigned(true);
                 return true;
             }
